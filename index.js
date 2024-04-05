@@ -32,20 +32,15 @@ FILM_PATHS.forEach((d) => {
     .sort((a, b) => a.ts - b.ts)
 
     console.log(`Encoding film ${d.name}...`)
-    const encoder = ffmpeg()
-    sorted.forEach((v) => encoder.input(v.part))
     
+    // replicate how the original game stores part lists
+    const LIST_PATH = path.join(d.path, d.name, "videoList.txt")
+    fs.writeFileSync(LIST_PATH, sorted.map((v) => `file '${v.part}'`).join("\n"))
+
+    const encoder = ffmpeg(LIST_PATH)
+
     encoder
-    // replicates film encoder settings (i tried using copy streams but failed)
-    .outputOptions([
-        '-c:v libvpx',
-        '-c:a libvorbis',
-        `-b:v ${((25 * 1024 * 1024 * 8) / 90) * 0.9}`, // 90% of discord's 25mb limit
-        '-ar 24000',
-        '-ac 2',
-    ])
-    .outputFormat("webm")
-    .mergeToFile(`./output/${d.name}.webm`)
-    .on("error", (err) => console.error(`ERROR ENCODING FILM ${d.name}:`, err))
-    .on("end", () => console.log(`Finished encoding film ${d.name}`))
+    .inputOptions(['-f concat', '-safe 0'])
+    .outputOptions('-c copy')
+    .save(path.resolve(`./output/${d.name}.webm`))
 })
