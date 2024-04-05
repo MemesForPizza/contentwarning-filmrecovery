@@ -1,0 +1,10 @@
+# node modules
+node_modules
+
+# output
+output/*
+!output/.keep
+
+# misc
+.env
+.vscode
