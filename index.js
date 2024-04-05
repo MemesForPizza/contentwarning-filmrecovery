@@ -12,13 +12,11 @@ console.log(`reading film paths in ${FILM_ROOT}`)
 const FILM_PATHS = fs.readdirSync(FILM_ROOT, {"withFileTypes": true}).filter((d) => d.isDirectory())
 FILM_PATHS.forEach((d) => {
     const PART_PATHS = fs.readdirSync(path.join(d.path, d.name), {"withFileTypes": true}).filter((p) => p.isDirectory())
-    console.log(`FILM ${d.name}:`)
-    console.log(PART_PATHS.map((p) => ` - PART ${p.name}`).join("\n"))
 
     const sorted = PART_PATHS.map((p) => {
         try {
             return {
-                "filename": p.name,
+                "name": p.name,
                 "path": p.path,
                 "part": path.join(p.path, p.name, "output.webm"),
                 "ts": fs.lstatSync(path.join(p.path, p.name, "output.webm")).birthtimeMs
@@ -31,6 +29,8 @@ FILM_PATHS.forEach((d) => {
     .filter((v) => !!v.ts)
     .sort((a, b) => a.ts - b.ts)
 
+    console.log(`FILM ${d.name}:`)
+    console.log(sorted.map((p) => ` - PART ${p.name}`).join("\n"))
     console.log(`Encoding film ${d.name}...`)
     
     // replicate how the original game stores part lists
